@@ -11,6 +11,11 @@ searchable = st.text_input("Enter your city")
 def get_data(place):
     return osmnx.features.features_from_place(place, {"amenity": True})
 if searchable:
+    try:
+        output = get_data(searchable)
+        # rest of your code continues here
+    except Exception as e:
+        st.error(f"Could not find '{searchable}'...")
     output = get_data(searchable)
     maincount = output["amenity"].value_counts()
     weights = {"hospital": 3, "school": 3, "bank": 2, "parking": 1, "police": 1}
@@ -27,6 +32,6 @@ if searchable:
     latmean=locate.y.mean()
     osmmap=folium.Map(location=[latmean, longmean])
     for index, row in filtered.iterrows():
-        popup = row["name:en"] if pd.notna(row["name:en"]) else (row["name:ar"] if pd.notna(row["name:ar"]) else row["amenity"])
+        popup = row.get("name:en") or row.get("name:ar") or row.get("amenity") or "Unknown"
         folium.Marker(location=[locate[index].y, locate[index].x], popup=popup).add_to(osmmap)
     st_folium(osmmap, width=700)
