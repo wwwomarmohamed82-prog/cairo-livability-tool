@@ -7,8 +7,11 @@ from streamlit_folium import st_folium
 st.title("Livability Score Calculator")
 st.text("Enter a city to calculate its livability score based on the presence of amenities such as hospitals, schools, banks, parking, and police stations.")
 searchable = st.text_input("Enter your city")
+@st.cache_data
+def get_data(place):
+    return osmnx.features.features_from_place(place, {"amenity": True})
 if searchable:
-    output = osmnx.features.features_from_place(searchable, {"amenity":True})
+    output = get_data(searchable)
     maincount = output["amenity"].value_counts()
     weights = {"hospital": 3, "school": 3, "bank": 2, "parking": 1, "police": 1}
     filtered = output[output["amenity"].isin(weights.keys())]
